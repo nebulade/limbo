@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Limbo Flimbo</title>
+		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+		<style type="text/css"> 
+			body {
+				background-color:#f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#panel {
+				position: absolute;
+				width: 180px;
+				font-family: Helvetica, Arial;
+				font-size:13px;
+				color: #606060;
+				background-color:#ffffff;
+				border-right: 1px solid #ddd;
+				float: left;
+			}
+
+			#messages {
+
+				color: #707070;
+
+			}
+
+			#container {
+				position: absolute;
+				top: 0px;
+				left: 0px;
+			}
+
+			#canvas {
+				position: absolute;
+
+			}
+
+			hr {
+
+				border: 0;
+				height: 1px;
+				background-color: #ccc;
+				margin: 20px 0px;
+
+			}
+
+			a {
+				color: #404040;
+				cursor: pointer;
+				text-decoration: underline;
+			}
+
+			a:hover {
+				text-decoration: none;
+			}
+
+			canvas {
+				cursor: crosshair;
+			}
+
+			input {
+				width: 100%;
+				font-family: Helvetica, Arial;
+				font-size:13px;
+				color: #808080;
+				border: 0;
+				background-color:#f0f0f0;
+			}
+
+			.colors {
+				display: block;
+				width:  40px;
+				height: 40px;
+				border-radius: 4px;
+				border-style: solid;
+				border-width: 2px;
+				border-color: black;
+			}
+
+			.colors.selected {
+				border-width: 5px;
+			}
+
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+
+		<canvas id="canvas"></canvas>
+		<div id="container"></div>
+		<div id="panel">
+			<table style="width: 100%; padding: 10px;"><tr><td>
+
+				<a class="colors selected" data-color="0"></a><br>
+				<a class="colors" data-color="1"></a><br />
+				<a class="colors" data-color="2"></a><br />
+				<a class="colors" data-color="3"></a><br />
+				<a class="colors" data-color="4"></a><br />
+
+			</td></tr>
+			<tr><td >
+				
+			</td></tr>
+			<tr><td>
+			</td></tr></table>
+		</div>
+		
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	var socket = io.connect();
+
+	socket.on('user connected', function(data){
+		addUser( data.userid.toString() );
+	});
+	
+	socket.on('user', function(data){
+		user_id = data.userid;	
+	});
+	
+	socket.on('userlist', function(data){		
+		$(data).each( function(){
+			addUser( this.toString() );
+		});
+	});	
+	
+	socket.on('user disconnected', function(data){
+		removeUser( data.userid );
+	});		
+	
+	socket.on('color', function(data){
+		users[ data.userid ].color = parseInt( data.color );
+	});
+	
+	socket.on('close', function(){
+		addServerMessage( 'Disconnected :/' );	
+	});
+
+
+	var users = {}, mouseX = 0, mouseY = 0, oldMouseX = 0, oldMouseY = 0, mouseDown = false;
+	var user_id;
+
+	var PANEL_WIDTH = 180,
+	SCREEN_WIDTH = window.innerWidth,
+	SCREEN_HEIGHT = window.innerHeight,
+	CANVAS_WIDTH = 1024,
+	CANVAS_HEIGHT = 1024;
+
+	var COLOR = 0;
+
+	var colorBlackButton = document.getElementById( 'colorBlackButton' );
+	var colorWhiteButton = document.getElementById( 'colorWhiteButton' );
+
+	var container = document.getElementById( 'container' );
+	container.style.left = PANEL_WIDTH + 'px';
+	container.addEventListener( 'mouseover', function( event ) { event.preventDefault(); }, false );
+	container.addEventListener( 'mousedown', function( event ) { event.preventDefault(); }, false );
+
+	var panel = document.getElementById( 'panel' );
+	panel.style.width = PANEL_WIDTH + 'px';
+
+	var canvas = document.getElementById( 'canvas' );
+	canvas.width = CANVAS_WIDTH;
+	canvas.height = CANVAS_HEIGHT;
+	canvas.style.left = PANEL_WIDTH + 'px';
+
+	var context = canvas.getContext( '2d' );
+	context.lineWidth = 0.3;
+	context.fillStyle = 'rgb(255, 255, 255)';
+	context.fillRect( 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
+
+	window.addEventListener( 'resize', onWindowResize, false );
+
+	$(canvas).bind('mousedown', function(event){
+		event.preventDefault();
+		mouseDown = true;
+		mouseX = event.clientX - canvas.offsetLeft;
+		mouseY = event.clientY - canvas.offsetTop;
+		socket.emit('draw', {userid: user_id, x:mouseX, y: mouseY});
+	});
+
+	$(document).bind('mouseup', function(event){
+		mouseDown = false;
+	});
+
+	$(document).bind('mousemove', function(event){
+		oldMouseX = mouseX;
+		oldMouseY = mouseY;
+		mouseX = event.clientX - canvas.offsetLeft;
+		mouseY = event.clientY - canvas.offsetTop;
+		
+		if ( mouseDown ) {
+			draw( oldMouseX, oldMouseY, mouseX, mouseY, COLOR );
+			socket.emit('draw', {userid: user_id, x:mouseX, y: mouseY, color:COLOR});
+		}
+	});
+	
+	function remoteDrawHandler(data){
+		var user = users[ data.userid ];
+
+		if (!user.x) user.x = data.x;
+		if (!user.y) user.y = data.y;
+
+		draw( user.x, user.y, data.x, data.y, data.color );
+		user.x = data.x;
+		user.y = data.y;
+	}
+
+	// like position but when the mouse is down
+	socket.on('draw', remoteDrawHandler);
+
+	socket.on('init', function (data) {
+		console.log('init client', data)
+		data.forEach(function (d) {
+			remoteDrawHandler(d);
+		});
+	});
+
+
+	function onWindowResize( event ) {
+		SCREEN_HEIGHT = window.innerHeight;
+		panel.style.height = SCREEN_HEIGHT + 'px';
+	}
+
+	function addUser( id ) {
+		console.log('adduser', id);
+		
+		var user = {
+			idColor: Math.floor( Math.random() * 128 + 32 ) + ',' + Math.floor( Math.random() * 128 + 32 ) + ',' + Math.floor( Math.random() * 128 + 32 ),
+			x: 0,
+			y: 0,
+			color: 0,
+			mouseDown: false
+		};
+
+		users[ id ] = user;
+	}
+
+	function removeUser( id ) {
+		delete users[ id ];
+	}
+
+	var colors = ['0,0,0', '255,255,255', '28,83,237', '237,28,36','39,200,7'];
+
+	function draw( x1, y1, x2, y2, color ) {
+		var dx  = x2 - x1,
+		dy = y2 - y1,
+		d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
+		
+		// // if(d > 0.7) d = 0.7;
+		// // context.strokeStyle = ( color == 0 ) ? 'rgba(0, 0, 0, ' + ( 0.7 - d )  + ')' : 'rgba(255, 255, 255, ' + ( 1 - d )  + ')';
+		// context.strokeStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
+		// context.lineWidth = 10.0;
+		// context.lineJoin = 'miter';
+		// context.beginPath();
+		// context.moveTo( x1, y1 );
+		// // context.quadraticCurveTo( x2, y2, x1, y1 );
+		// context.lineTo( x2, y2 );
+		// context.stroke();
+		// context.closePath();
+
+		var penSize = 20;
+		context.beginPath();
+		context.fillStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
+	    context.arc(x2, y2, penSize, 0, Math.PI*2, true);
+	    context.closePath();
+	    context.fill();
+	}
+
+	$('.colors').click(function(){
+		COLOR = $(this).data('color');
+		$('.colors').removeClass('selected');
+		$(this).addClass('selected');
+		this.style.backgroundColor = 'rgb(' + colors[COLOR] +')';
+	});
+
+	$('.colors').each(function(){
+		this.style.backgroundColor = 'rgba(' + colors[$(this).data('color')] +')';
+	});
+
+	function saveDrawing() {
+		window.open( canvas.toDataURL( 'image/png' ), 'mywindow' );
+	}
+	
+	
+</script>
+
+
+
+	</body>
+</html>

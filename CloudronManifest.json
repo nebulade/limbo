@@ -1,0 +1,11 @@
+{
+  "id": "de.nebulon.limboflimbo",
+  "title": "Limbo Flimbo",
+  "version": "0.1.0",
+  "healthCheckPath": "/",
+  "httpPort": 3000,
+  "addons": {
+    "localstorage": {}
+  },
+  "manifestVersion": 2
+}

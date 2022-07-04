@@ -1,0 +1,22 @@
+{
+  "name": "multiuser-sketch",
+  "version": "1.0.0",
+  "description": "A multiuser sketchpad based off of MR Doob's chrome experiment: http://mrdoob.com/projects/multiuserpad/",
+  "main": "sketch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iufer/multiuser-sketch.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iufer/multiuser-sketch/issues"
+  },
+  "homepage": "https://github.com/iufer/multiuser-sketch#readme",
+  "dependencies": {
+    "socket.io": "^4.5.1"
+  }
+}
