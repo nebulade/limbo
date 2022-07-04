@@ -6,7 +6,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
-app.use(require('express').static('.'));
+app.use(require('express').static('public'));
 
 server.listen(3000);
 
@@ -35,5 +35,11 @@ io.sockets.on('connection', function (socket) {
 	
 	socket.on('color', function(data){
 		socket.broadcast.emit('color', data);
+	});
+
+	socket.on('clear', function () {
+		console.log('clearing canvas');
+		strokes = [];
+		socket.broadcast.emit('clear');
 	});
 });
