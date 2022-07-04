@@ -2,25 +2,13 @@
 
 'use strict';
 
-const app = require('http').createServer(handler);
-const { Server } = require('socket.io');
-const fs = require('fs');
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
-var io = new Server(app);
+app.use(require('express').static('.'));
 
-app.listen(3000);
-
-function handler (req, res) {
-  fs.readFile(__dirname + '/index.html', function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(data);
-  });
-}
+server.listen(3000);
 
 var users = [];
 var strokes = [];
