@@ -1,270 +1,64 @@
 <!doctype html>
 <html>
-	<head>
-		<title>Limbo Flimbo</title>
-		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
-		<style type="text/css"> 
-			body {
-				background-color:#f0f0f0;
-				margin: 0px;
-				overflow: hidden;
-                font-family: Arial;
-			}
+<head>
+    <title>Limbo Flimbo</title>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
-			.panel {
-				position: absolute;
-				padding: 5px;
-				border: 1px solid #ddd;
-				background-color: white;
-				border-radius: 10px;
-			}
+<style type="text/css">
+    body, html {
+        background-color:#f0f0f0;
+        margin: 0px;
+        overflow: hidden;
+        font-family: Arial;
+        height: 100%;
+    }
 
-            .color-selector {
-				left: 20px;
-				top: 20px;
-            }
+    .container {
+        display: flex;
+    }
 
-            .controls {
-                left: 20px;
-                top: 540px;
-            }
+    .location {
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        padding: 20px;
+        margin: 20px;
+        background-color: white;
+    }
 
-			#messages {
+    .location:hover {
+        border: 2px solid #ddd;
+    }
 
-				color: #707070;
+</style>
+</head>
 
-			}
+<body>
 
-			#canvas {
-				position: absolute;
-				top: 0;
-				left: 0;
-				cursor: crosshair;
-			}
+<div class="container">
+    <div class="location" id="place1Button">Hauptstr.</div>
+    <div class="location" id="place2Button">Potsdamer Platz</div>
+</div>
 
-			a {
-				color: #404040;
-				cursor: pointer;
-				text-decoration: underline;
-			}
-
-			a:hover {
-				text-decoration: none;
-			}
-
-			.colors {
-				display: block;
-				width:  40px;
-				height: 40px;
-				border-radius: 4px;
-				border-style: solid;
-				border-width: 2px;
-				border-color: #ddd;
-                margin: 5px;
-			}
-
-			.colors.selected {
-				border-color: black;
-			}
-
-            .button {
-                cursor: pointer;
-                padding: 10px;
-            }
-
-		</style>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-	</head>
-	<body>
-
-		<canvas id="canvas"></canvas>
-		<div class="color-selector panel">
-			<div class="colors selected" data-color="0"></div>
-			<div class="colors" data-color="1"></div>
-			<div class="colors" data-color="2"></div>
-			<div class="colors" data-color="3"></div>
-			<div class="colors" data-color="4"></div>
-		</div>
-
-        <div class="controls panel">
-            <div class="button" id="clearButton">Clear</div>
-        </div>
-		
-<script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
-	var socket = io.connect();
 
-	var users = {}, mouseX = 0, mouseY = 0, oldMouseX = 0, oldMouseY = 0, mouseDown = false;
-	var user_id;
+    var place = localStorage.place;
+    if (place) window.location.href = '/draw.html';
 
-    var colors = ['0,0,0', '255,255,255', '28,83,237', '237,28,36','39,200,7'];
-
-	var CANVAS_WIDTH = 1024;
-	var CANVAS_HEIGHT = 600;
-
-    var COLOR = 0;
-
-    var canvas = document.getElementById( 'canvas' );
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-
-    var context = canvas.getContext( '2d' );
-
-    socket.on('user connected', function(data){
-        addUser( data.userid.toString() );
-    });
-
-    socket.on('user', function(data){
-        user_id = data.userid;
-    });
-
-    socket.on('userlist', function (data) {
-        data.forEach(addUser);
-    });
-
-    socket.on('user disconnected', function(data){
-        removeUser( data.userid );
-    });
-
-    socket.on('color', function(data){
-        users[ data.userid ].color = parseInt( data.color );
-    });
-
-    socket.on('clear', function () {
-        clearCanvas();
-    });
-
-    socket.on('close', function(){
-        addServerMessage( 'Disconnected :/' );
-    });
-
-    function clearCanvas() {
-        context.lineWidth = 0.3;
-        context.fillStyle = 'rgb(255, 255, 255)';
-        context.fillRect( 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
-    }
-    clearCanvas();
-
-    function inputDown(event) {
-        mouseDown = true;
-        mouseX = event.clientX - canvas.offsetLeft;
-        mouseY = event.clientY - canvas.offsetTop;
-        socket.emit('draw', {userid: user_id, x:mouseX, y: mouseY});
+    function selectPlace(place) {
+        localStorage.place = place;
+        window.location.href = '/draw.html';
     }
 
-    function inputUp() {
-        mouseDown = false;
-    }
-
-    function inputMove(event) {
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-        mouseX = event.clientX - canvas.offsetLeft;
-        mouseY = event.clientY - canvas.offsetTop;
-
-        if ( mouseDown ) {
-            draw( oldMouseX, oldMouseY, mouseX, mouseY, COLOR );
-            socket.emit('draw', {userid: user_id, x:mouseX, y: mouseY, color:COLOR});
-        }
-    }
-
-    canvas.addEventListener('mousedown', inputDown);
-    canvas.addEventListener('touchstart', function (event) { event.preventDefault(); inputDown(event.touches[0]); });
-
-    window.document.addEventListener('mouseup', inputUp);
-    window.document.addEventListener('touchend', inputUp);
-
-    window.document.addEventListener('mousemove', inputMove);
-    window.document.addEventListener('touchmove', function (event) { inputMove(event.touches[0]); });
-
-    function remoteDrawHandler(data){
-        var user = users[ data.userid ];
-
-        if (!user) return;
-
-        if (!user.x) user.x = data.x;
-        if (!user.y) user.y = data.y;
-
-        draw( user.x, user.y, data.x, data.y, data.color );
-        user.x = data.x;
-        user.y = data.y;
-    }
-
-    socket.on('draw', remoteDrawHandler);
-
-    socket.on('init', function (data) {
-        console.log('init client', data);
-        data.forEach(function (d) {
-            remoteDrawHandler(d);
-        });
+    document.getElementById('place1Button').addEventListener('click', function () {
+        selectPlace(1);
     });
 
-    function addUser( id ) {
-        console.log('adduser', id);
-
-        var user = {
-            idColor: Math.floor( Math.random() * 128 + 32 ) + ',' + Math.floor( Math.random() * 128 + 32 ) + ',' + Math.floor( Math.random() * 128 + 32 ),
-            x: 0,
-            y: 0,
-            color: 0,
-            mouseDown: false
-        };
-
-        users[ id ] = user;
-    }
-
-    function removeUser( id ) {
-        delete users[ id ];
-    }
-
-	function draw( x1, y1, x2, y2, color ) {
-		var dx  = x2 - x1,
-		dy = y2 - y1,
-		d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
-		
-		// // if(d > 0.7) d = 0.7;
-		// // context.strokeStyle = ( color == 0 ) ? 'rgba(0, 0, 0, ' + ( 0.7 - d )  + ')' : 'rgba(255, 255, 255, ' + ( 1 - d )  + ')';
-		// context.strokeStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
-		// context.lineWidth = 10.0;
-		// context.lineJoin = 'miter';
-		// context.beginPath();
-		// context.moveTo( x1, y1 );
-		// // context.quadraticCurveTo( x2, y2, x1, y1 );
-		// context.lineTo( x2, y2 );
-		// context.stroke();
-		// context.closePath();
-
-		var penSize = 20;
-		context.beginPath();
-		context.fillStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
-	    context.arc(x2, y2, penSize, 0, Math.PI*2, true);
-	    context.closePath();
-	    context.fill();
-	}
-
-    document.querySelectorAll('.colors').forEach(function (element) {
-        var color = element.getAttribute('data-color');
-
-        element.style.backgroundColor = 'rgba(' + colors[color] +')';
-
-        element.addEventListener('click', function () {
-            document.querySelectorAll('.colors').forEach(function (e) { e.classList.remove('selected'); });
-
-            element.classList.add('selected');
-            element.style.backgroundColor = 'rgb(' + colors[color] +')';
-
-            COLOR = color;
-        });
-    });
-
-    document.getElementById('clearButton').addEventListener('click', function () {
-        clearCanvas();
-        socket.emit('clear');
+    document.getElementById('place2Button').addEventListener('click', function () {
+        selectPlace(2);
     });
 
 </script>
 
-
-
-	</body>
+</body>
 </html>
