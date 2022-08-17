@@ -17,30 +17,6 @@
                 font-family: Arial;
             }
 
-            .panel {
-                position: absolute;
-                padding: 5px;
-                border: 1px solid #ddd;
-                background-color: white;
-                border-radius: 10px;
-            }
-
-            .color-selector {
-                left: 20px;
-                top: 20px;
-            }
-
-            .controls {
-                left: 20px;
-                top: 310px;
-            }
-
-            #messages {
-
-                color: #707070;
-
-            }
-
             #canvas {
                 position: absolute;
                 top: 0;
@@ -56,21 +32,6 @@
 
             a:hover {
                 text-decoration: none;
-            }
-
-            .colors {
-                display: block;
-                width:  40px;
-                height: 40px;
-                border-radius: 4px;
-                border-style: solid;
-                border-width: 2px;
-                border-color: #ddd;
-                margin: 5px;
-            }
-
-            .colors.selected {
-                border-color: black;
             }
 
             .modal-dialog {
@@ -122,14 +83,14 @@
                 background-color: #efefef;
             }
 
-            .brush.button {
+            .brush-select.button {
                 left: 20px;
                 top: 450px;
                 width: 70px;
                 height: 70px;
             }
 
-            .color.button {
+            .color-select.button {
                 left: 20px;
                 top: 550px;
                 width: 70px;
@@ -149,6 +110,85 @@
                 font-size: 30px;
             }
 
+            .select-modal {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .select-modal .title {
+                text-align: center;
+                font-size: 40px;
+            }
+
+            .select-modal .subtitle {
+                text-align: center;
+                font-family: sigoil;
+                font-size: 20px;
+                margin-top: 30px;
+            }
+
+            .modal-confirm-button {
+                font-size: 40px;
+                padding: 25px;
+                cursor: pointer;
+            }
+
+            .modal-title-icon {
+                width: 100px;
+                height: 100px;
+                margin-bottom: 20px;
+            }
+
+            .colors {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+                margin-bottom: 10px;
+            }
+
+            .color {
+                background-color: blue;
+                width: 50px;
+                height: 50px;
+                margin: 20px;
+                border-radius: 4px;
+                border-style: solid;
+                border-width: 2px;
+                border-color: #ddd;
+            }
+
+            .color.selected {
+                border-color: black;
+            }
+
+            .brushes {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+                margin-bottom: 10px;
+                align-items: center;
+            }
+
+            .brush {
+                margin: 20px;
+                border-radius: 500px;
+                border-style: solid;
+                border-width: 2px;
+                border-color: #ddd;
+            }
+
+            .brush.selected {
+                border-color: black;
+            }
+
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     </head>
@@ -166,8 +206,8 @@
         <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
         <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
 
-        <div class="brush button"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
-        <div class="color button"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
+        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+        <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
         <div class="eraser button"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
         <div class="ok button" id="doneButton">OK</div>
@@ -183,20 +223,64 @@
                 Printing in progress...
             </div>
         </div>
+
+        <div class="select-modal hidden" id="colorSelectModal">
+            <div class="modal-title-icon"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
+            <div class="title">Choose a Colour</div>
+            <div class="subtitle">Wähle eine Farbe</div>
+            <div class="colors">
+                <div class="color" data-color="1"></div>
+                <div class="color" data-color="2"></div>
+                <div class="color" data-color="3"></div>
+                <div class="color" data-color="4"></div>
+                <div class="color" data-color="5"></div>
+            </div>
+            <span class="modal-confirm-button" id="colorSelectDoneButton">OK</span>
+        </div>
+
+        <div class="select-modal hidden" id="brushSelectModal">
+            <div class="modal-title-icon"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+            <div class="title">Choose a Brush Size</div>
+            <div class="subtitle">Wähle eine Pinselgröße</div>
+            <div class="brushes">
+                <div class="brush" data-brush="5"></div>
+                <div class="brush" data-brush="10"></div>
+                <div class="brush" data-brush="15"></div>
+                <div class="brush" data-brush="20"></div>
+                <div class="brush" data-brush="25"></div>
+            </div>
+            <span class="modal-confirm-button" id="brushSelectDoneButton">OK</span>
+        </div>
         
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
 
+    // init
     var client = localStorage.client;
     if (!client) window.location.href = '/index.html';
 
     console.log('This is client ' + client);
 
+    // helper functions
+    function click(id, handler) { document.getElementById(id).addEventListener('click', handler); }
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
     var socket = io.connect();
 
     var mouseX = 0, mouseY = 0, oldMouseX = 0, oldMouseY = 0, mouseDown = false;
 
-    var colors = ['0,0,0', '255,255,255', '28,83,237', '237,28,36','39,200,7'];
+    var colors = [];
+    colors[11] = '255,0,0';
+    colors[12] = '255,100,255';
+    colors[13] = '255,83,237';
+    colors[14] = '255,28,36';
+    colors[15] = '255,200,7';
+    colors[21] = '0,255,0';
+    colors[22] = '255,100,255';
+    colors[23] = '28,255,237';
+    colors[24] = '237,255,36';
+    colors[25] = '39,255,7';
 
     var CANVAS_WIDTH = 1024;
     var CANVAS_HEIGHT = 768;
@@ -236,9 +320,9 @@
         mouseX = event.clientX - canvas.offsetLeft;
         mouseY = event.clientY - canvas.offsetTop;
 
-        if ( mouseDown ) {
-            draw( oldMouseX, oldMouseY, mouseX, mouseY, COLOR );
-            socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR });
+        if (mouseDown) {
+            draw(oldMouseX, oldMouseY, mouseX, mouseY, COLOR, BRUSH);
+            socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR, brush: BRUSH });
         }
     }
 
@@ -251,29 +335,29 @@
     window.document.addEventListener('mousemove', inputMove);
     window.document.addEventListener('touchmove', function (event) { inputMove(event.touches[0]); });
 
-    function remoteDrawHandler(data){
-        draw( data.x, data.y, data.x, data.y, data.color );
+    function remoteDrawHandler(data) {
+        draw(data.x, data.y, data.x, data.y, data.color, data.brush);
     }
 
     socket.on('clear', function () {
         clearCanvas();
     });
 
-    socket.on('close', function(){
+    socket.on('close', function() {
         addServerMessage( 'Disconnected :/' );
     });
 
     socket.on('printing', function (data) {
         console.log('Now printing...', data);
-        document.getElementById('doneDialog').classList.add('hidden');
-        document.getElementById('printingDialog').classList.remove('hidden');
+        hide('doneDialog');
+        show('printingDialog');
     });
 
     socket.on('reset', function (data) {
         console.log('All done, reset state.', data);
         clearCanvas();
-        document.getElementById('doneDialog').classList.add('hidden');
-        document.getElementById('printingDialog').classList.add('hidden');
+        hide('doneDialog');
+        hide('printingDialog');
         done = false;
     });
 
@@ -289,7 +373,7 @@
         });
     });
 
-    function draw( x1, y1, x2, y2, color ) {
+    function draw(x1, y1, x2, y2, color, brush) {
         var dx  = x2 - x1,
         dy = y2 - y1,
         d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
@@ -306,7 +390,7 @@
         // context.stroke();
         // context.closePath();
 
-        var penSize = 20;
+        var penSize = brush;
         context.beginPath();
         context.fillStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
         context.arc(x2, y2, penSize, 0, Math.PI*2, true);
@@ -314,13 +398,16 @@
         context.fill();
     }
 
-    document.querySelectorAll('.colors').forEach(function (element) {
-        var color = element.getAttribute('data-color');
+    document.querySelectorAll('.color').forEach(function (element) {
+        var color = parseInt(element.getAttribute('data-color'));
+
+        // each client has a different color palette
+        color = (client === 'a' ? 10 : 20) + color;
 
         element.style.backgroundColor = 'rgba(' + colors[color] +')';
 
         element.addEventListener('click', function () {
-            document.querySelectorAll('.colors').forEach(function (e) { e.classList.remove('selected'); });
+            document.querySelectorAll('.color').forEach(function (e) { e.classList.remove('selected'); });
 
             element.classList.add('selected');
             element.style.backgroundColor = 'rgb(' + colors[color] +')';
@@ -329,16 +416,36 @@
         });
     });
 
+    document.querySelectorAll('.brush').forEach(function (element) {
+        var brush = parseInt(element.getAttribute('data-brush'));
+
+        element.style.width = (brush * 3) + 'px';
+        element.style.height = (brush * 3) + 'px';
+
+        element.addEventListener('click', function () {
+            document.querySelectorAll('.brush').forEach(function (e) { e.classList.remove('selected'); });
+
+            element.classList.add('selected');
+
+            BRUSH = brush;
+        });
+    });
+
     // document.getElementById('clearButton').addEventListener('click', function () {
     //     clearCanvas();
     //     socket.emit('clear');
     // });
 
-    document.getElementById('doneButton').addEventListener('click', function () {
-        console.log('Now done...');
-        document.getElementById('doneDialog').classList.remove('hidden');
+    click('doneButton', function () {
+        show('doneDialog');
         socket.emit('done', { client: client });
     });
+
+    click('colorSelectButton', function () { show('colorSelectModal'); });
+    click('colorSelectDoneButton', function () { hide('colorSelectModal'); });
+
+    click('brushSelectButton', function () { show('brushSelectModal'); });
+    click('brushSelectDoneButton', function () { hide('brushSelectModal'); });
 
 </script>
 

@@ -60,7 +60,7 @@ io.sockets.on('connection', function (socket) {
 
                 const canvasPath = path.join(STORAGE_PATH, Date.now() + '.csv');
                 console.log('saving canvas to', canvasPath);
-                fs.writeFileSync(canvasPath, strokes.filter(function (s) { return s.x && s.y && s.color; }).map(function (s) { return `${s.x},${s.y},${s.color}`; }).join('\n') + '\n');
+                fs.writeFileSync(canvasPath, strokes.filter(function (s) { return s.x && s.y && s.color && s.brush; }).map(function (s) { return `${s.x},${s.y},${s.color},${s.brush}`; }).join('\n') + '\n');
 
                 io.emit('printing', {});
 
