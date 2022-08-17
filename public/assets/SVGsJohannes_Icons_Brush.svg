@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Ebene_3"
+   viewBox="0 0 85.81 85.81"
+   version="1.1"
+   sodipodi:docname="SVGsJohannes_Icons_Brush.svg"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview2364"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="11.968302"
+     inkscape:cx="42.946776"
+     inkscape:cy="27.572833"
+     inkscape:window-width="1920"
+     inkscape:window-height="1048"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Ebene_3" />
+  <defs
+     id="defs2355">
+    <style
+       id="style2353">.cls-1{fill:none;stroke:#000;stroke-miterlimit:10;stroke-width:1.5px;}</style>
+  </defs>
+  <polygon
+     class="cls-1"
+     points="1.5,48.8 1.5,37.06 72.18,37.06 84.3,42.93 72.18,48.8 "
+     id="polygon2357"
+     transform="rotate(-90,43.385307,42.93)" />
+  <line
+     class="cls-1"
+     x1="37.465305"
+     y1="14.445304"
+     x2="49.195309"
+     y2="14.445304"
+     id="line2359" />
+  <line
+     class="cls-1"
+     x1="46.855309"
+     y1="8.6853094"
+     x2="39.805305"
+     y2="8.6853094"
+     id="line2361" />
+</svg>

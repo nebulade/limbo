@@ -4,6 +4,12 @@
         <title>Limbo Flimbo</title>
         <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
         <style type="text/css"> 
+
+            @font-face {
+                font-family: sigoil;
+                src: url('assets/Sligoil-Micro copy.otf');
+            }
+
             body {
                 background-color:#f0f0f0;
                 margin: 0px;
@@ -67,17 +73,6 @@
                 border-color: black;
             }
 
-            .button {
-                cursor: pointer;
-                padding: 10px;
-                border-radius: 4px;
-                border: 2px solid transparent;
-            }
-
-            .button:hover {
-                border: 2px solid #ddd;
-            }
-
             .modal-dialog {
                 display: flex;
                 align-items: center;
@@ -101,24 +96,81 @@
                 display: none !important;
             }
 
+            .question-en {
+                position: absolute;
+                left: 20px;
+                top: 5px;
+                width: 800px;
+                font-size: 38px;
+            }
+
+            .question-de {
+                position: absolute;
+                left: 20px;
+                top: 120px;
+                width: 800px;
+                font-size: 16px;
+                font-family: sigoil;
+            }
+
+            .button {
+                position: absolute;
+                cursor: pointer;
+            }
+
+            .button:hover {
+                background-color: #efefef;
+            }
+
+            .brush.button {
+                left: 20px;
+                top: 450px;
+                width: 70px;
+                height: 70px;
+            }
+
+            .color.button {
+                left: 20px;
+                top: 550px;
+                width: 70px;
+                height: 70px;
+            }
+
+            .eraser.button {
+                left: 20px;
+                top: 650px;
+                width: 70px;
+                height: 70px;
+            }
+
+            .ok.button {
+                left: 900px;
+                top: 690px;
+                font-size: 30px;
+            }
+
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
 
         <canvas id="canvas"></canvas>
-        <div class="color-selector panel">
+        <!-- <div class="color-selector panel">
             <div class="colors selected" data-color="0"></div>
             <div class="colors" data-color="1"></div>
             <div class="colors" data-color="2"></div>
             <div class="colors" data-color="3"></div>
             <div class="colors" data-color="4"></div>
-        </div>
+        </div> -->
 
-        <div class="controls panel">
-            <!-- <div class="button" id="clearButton">Clear</div> -->
-            <div class="button" id="doneButton">Done</div>
-        </div>
+        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
+        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
+
+        <div class="brush button"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+        <div class="color button"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
+        <div class="eraser button"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+
+        <div class="ok button" id="doneButton">OK</div>
 
         <div class="modal-dialog hidden" id="doneDialog">
             <div class="modal-dialog-content">
@@ -147,7 +199,7 @@
     var colors = ['0,0,0', '255,255,255', '28,83,237', '237,28,36','39,200,7'];
 
     var CANVAS_WIDTH = 1024;
-    var CANVAS_HEIGHT = 600;
+    var CANVAS_HEIGHT = 768;
 
     var COLOR = 0;
     var BRUSH = 0;
