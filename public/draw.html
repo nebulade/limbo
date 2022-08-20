@@ -203,6 +203,17 @@
     </head>
     <body>
 
+        <canvas id="canvas"></canvas>
+
+        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
+        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
+
+        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+        <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
+        <div class="eraser button" id="erasorButton"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+
+        <div class="ok button" id="doneButton">OK</div>
+
         <div class="modal-dialog hidden" id="doneDialog">
             <div class="modal-dialog-content">
                 <div class="title">Waiting for partner to be done...</div>
@@ -244,17 +255,6 @@
             </div>
             <span class="modal-confirm-button" id="brushSelectDoneButton">OK</span>
         </div>
-
-        <canvas id="canvas"></canvas>
-
-        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
-        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
-
-        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
-        <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
-        <div class="eraser button" id="erasorButton"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
-
-        <div class="ok button" id="doneButton">OK</div>
 
         <div class="client-indicator" id="clientIndicator"></div>
         
@@ -323,7 +323,16 @@
             dy = mouseY - oldMouseY,
             d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
 
-            draw(oldMouseX, oldMouseY, mouseX, mouseY, d, COLOR, BRUSH);
+            // // add extra point if far apart
+            // if (dx > 20 || dy > 20) {
+            //     var x = mouseX + Math.floor(dx/2);
+            //     var y = mouseY + Math.floor(dy/2);
+
+            //     draw(x, y, d, COLOR, BRUSH);
+            //     socket.emit('draw', { x: x, y: y, d: d, color: COLOR, brush: BRUSH });
+            // }
+
+            draw(mouseX, mouseY, d, COLOR, BRUSH);
             socket.emit('draw', { x: mouseX, y: mouseY, d: d, color: COLOR, brush: BRUSH });
         }
     }
@@ -338,7 +347,7 @@
     window.document.addEventListener('touchmove', function (event) { inputMove(event.touches[0]); });
 
     function remoteDrawHandler(data) {
-        draw(data.x, data.y, data.x, data.y, data.d, data.color, data.brush);
+        draw(data.x, data.y, data.d, data.color, data.brush);
     }
 
     socket.on('clear', function () {
@@ -379,23 +388,11 @@
         });
     });
 
-    function draw(x1, y1, x2, y2, d, color, brush) {
-        // // if(d > 0.7) d = 0.7;
-        // // context.strokeStyle = ( color == 0 ) ? 'rgba(0, 0, 0, ' + ( 0.7 - d )  + ')' : 'rgba(255, 255, 255, ' + ( 1 - d )  + ')';
-        // context.strokeStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
-        // context.lineWidth = 10.0;
-        // context.lineJoin = 'miter';
-        // context.beginPath();
-        // context.moveTo( x1, y1 );
-        // // context.quadraticCurveTo( x2, y2, x1, y1 );
-        // context.lineTo( x2, y2 );
-        // context.stroke();
-        // context.closePath();
-
+    function draw(x, y, d, color, brush) {
         var penSize = brush;
         context.beginPath();
         context.fillStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
-        context.arc(x2, y2, penSize, 0, Math.PI*2, true);
+        context.arc(x, y, penSize, 0, Math.PI*2, true);
         context.closePath();
         context.fill();
     }
