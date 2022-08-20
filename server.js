@@ -23,6 +23,19 @@ var state = {
     }
 };
 
+var colors = [];
+colors[0] = '255,255,255';
+colors[11] = '255,0,0';
+colors[12] = '255,100,255';
+colors[13] = '255,83,237';
+colors[14] = '255,28,36';
+colors[15] = '255,200,7';
+colors[21] = '0,255,0';
+colors[22] = '255,100,255';
+colors[23] = '28,255,237';
+colors[24] = '237,255,36';
+colors[25] = '39,255,7';
+
 const STORAGE_PATH = path.join(__dirname, 'paintings');
 
 function ensureStoragePath() {
@@ -34,7 +47,7 @@ ensureStoragePath();
 io.sockets.on('connection', function (socket) {
     console.log('new Connection');
 
-    socket.emit('init', { state, strokes });
+    socket.emit('init', { state, strokes, colors });
 
     socket.on('draw', function (data) {
         strokes.push(data);
@@ -60,7 +73,9 @@ io.sockets.on('connection', function (socket) {
 
                 const canvasPath = path.join(STORAGE_PATH, Date.now() + '.csv');
                 console.log('saving canvas to', canvasPath);
-                fs.writeFileSync(canvasPath, strokes.filter(function (s) { return s.x && s.y && s.color && s.brush; }).map(function (s) { return `${s.x},${s.y},${s.color},${s.brush}`; }).join('\n') + '\n');
+                fs.writeFileSync(canvasPath, strokes.filter(function (s) {
+                    return s.x && s.y && typeof s.d !== 'undefined' && typeof s.color !== 'undefined' && s.brush;
+                }).map(function (s) { return `${s.x},${s.y},${s.d},${s.color},${s.brush}`; }).join('\n') + '\n');
 
                 io.emit('printing', {});
 

@@ -15,6 +15,7 @@
                 margin: 0px;
                 overflow: hidden;
                 font-family: Arial;
+                user-select: none;
             }
 
             #canvas {
@@ -43,14 +44,11 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-color: rgba(256, 256, 256, 0.5);
+                background-color: rgba(256, 256, 256, 0.7);
             }
 
             .modal-dialog-content {
-                background-color: white;
                 padding: 10px;
-                border-radius: 10px;
-                border: 1px solid #ddd;
             }
 
             .hidden {
@@ -63,6 +61,7 @@
                 top: 5px;
                 width: 800px;
                 font-size: 38px;
+                pointer-events: none;
             }
 
             .question-de {
@@ -72,6 +71,7 @@
                 width: 800px;
                 font-size: 16px;
                 font-family: sigoil;
+                pointer-events: none;
             }
 
             .button {
@@ -123,12 +123,14 @@
                 align-items: center;
             }
 
-            .select-modal .title {
+            .select-modal .title,
+            .modal-dialog-content .title {
                 text-align: center;
                 font-size: 40px;
             }
 
-            .select-modal .subtitle {
+            .select-modal .subtitle,
+            .modal-dialog-content .subtitle {
                 text-align: center;
                 font-family: sigoil;
                 font-size: 20px;
@@ -189,38 +191,29 @@
                 border-color: black;
             }
 
+            .client-indicator {
+                position: absolute;
+                font-size: 10px;
+                bottom: 10px;
+                left: 10px;
+            }
+
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
 
-        <canvas id="canvas"></canvas>
-        <!-- <div class="color-selector panel">
-            <div class="colors selected" data-color="0"></div>
-            <div class="colors" data-color="1"></div>
-            <div class="colors" data-color="2"></div>
-            <div class="colors" data-color="3"></div>
-            <div class="colors" data-color="4"></div>
-        </div> -->
-
-        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
-        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
-
-        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
-        <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
-        <div class="eraser button"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
-
-        <div class="ok button" id="doneButton">OK</div>
-
         <div class="modal-dialog hidden" id="doneDialog">
             <div class="modal-dialog-content">
-                Waiting for partner to be done...
+                <div class="title">Waiting for partner to be done...</div>
+                <div class="subtitle">Wir warten auf die Andere...</div>
             </div>
         </div>
 
         <div class="modal-dialog hidden" id="printingDialog">
             <div class="modal-dialog-content">
-                Printing in progress...
+                <div class="title">Printing in progress...</div>
+                <div class="subtitle">Es wird gedruckt...</div>
             </div>
         </div>
 
@@ -251,6 +244,19 @@
             </div>
             <span class="modal-confirm-button" id="brushSelectDoneButton">OK</span>
         </div>
+
+        <canvas id="canvas"></canvas>
+
+        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
+        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
+
+        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+        <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
+        <div class="eraser button" id="erasorButton"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+
+        <div class="ok button" id="doneButton">OK</div>
+
+        <div class="client-indicator" id="clientIndicator"></div>
         
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
@@ -261,6 +267,8 @@
 
     console.log('This is client ' + client);
 
+    document.getElementById('clientIndicator').innerText = client;
+
     // helper functions
     function click(id, handler) { document.getElementById(id).addEventListener('click', handler); }
     function show(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -270,23 +278,13 @@
 
     var mouseX = 0, mouseY = 0, oldMouseX = 0, oldMouseY = 0, mouseDown = false;
 
-    var colors = [];
-    colors[11] = '255,0,0';
-    colors[12] = '255,100,255';
-    colors[13] = '255,83,237';
-    colors[14] = '255,28,36';
-    colors[15] = '255,200,7';
-    colors[21] = '0,255,0';
-    colors[22] = '255,100,255';
-    colors[23] = '28,255,237';
-    colors[24] = '237,255,36';
-    colors[25] = '39,255,7';
 
     var CANVAS_WIDTH = 1024;
     var CANVAS_HEIGHT = 768;
 
     var COLOR = client === 'a' ? 11 : 21;
     var BRUSH = 10;
+    var colors = [];
 
     var done = false;
 
@@ -307,7 +305,7 @@
         mouseDown = true;
         mouseX = event.clientX - canvas.offsetLeft;
         mouseY = event.clientY - canvas.offsetTop;
-        socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR });
+        // socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR });
     }
 
     function inputUp() {
@@ -321,8 +319,12 @@
         mouseY = event.clientY - canvas.offsetTop;
 
         if (mouseDown) {
-            draw(oldMouseX, oldMouseY, mouseX, mouseY, COLOR, BRUSH);
-            socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR, brush: BRUSH });
+            var dx  = mouseX - oldMouseX,
+            dy = mouseY - oldMouseY,
+            d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
+
+            draw(oldMouseX, oldMouseY, mouseX, mouseY, d, COLOR, BRUSH);
+            socket.emit('draw', { x: mouseX, y: mouseY, d: d, color: COLOR, brush: BRUSH });
         }
     }
 
@@ -336,7 +338,7 @@
     window.document.addEventListener('touchmove', function (event) { inputMove(event.touches[0]); });
 
     function remoteDrawHandler(data) {
-        draw(data.x, data.y, data.x, data.y, data.color, data.brush);
+        draw(data.x, data.y, data.x, data.y, data.d, data.color, data.brush);
     }
 
     socket.on('clear', function () {
@@ -367,17 +369,17 @@
         console.log('init client', data);
 
         done = data.state[client].done;
+        colors = data.colors;
+
+        initColorSelector();
+        initBrushSelector();
 
         data.strokes.forEach(function (d) {
             remoteDrawHandler(d);
         });
     });
 
-    function draw(x1, y1, x2, y2, color, brush) {
-        var dx  = x2 - x1,
-        dy = y2 - y1,
-        d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
-        
+    function draw(x1, y1, x2, y2, d, color, brush) {
         // // if(d > 0.7) d = 0.7;
         // // context.strokeStyle = ( color == 0 ) ? 'rgba(0, 0, 0, ' + ( 0.7 - d )  + ')' : 'rgba(255, 255, 255, ' + ( 1 - d )  + ')';
         // context.strokeStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
@@ -398,38 +400,42 @@
         context.fill();
     }
 
-    document.querySelectorAll('.color').forEach(function (element) {
-        var color = parseInt(element.getAttribute('data-color'));
+    function initColorSelector() {
+        document.querySelectorAll('.color').forEach(function (element) {
+            var color = parseInt(element.getAttribute('data-color'));
 
-        // each client has a different color palette
-        color = (client === 'a' ? 10 : 20) + color;
+            // each client has a different color palette
+            color = (client === 'a' ? 10 : 20) + color;
 
-        element.style.backgroundColor = 'rgba(' + colors[color] +')';
+            element.style.backgroundColor = 'rgba(' + colors[color] +')';
 
-        element.addEventListener('click', function () {
-            document.querySelectorAll('.color').forEach(function (e) { e.classList.remove('selected'); });
+            element.addEventListener('click', function () {
+                document.querySelectorAll('.color').forEach(function (e) { e.classList.remove('selected'); });
 
-            element.classList.add('selected');
-            element.style.backgroundColor = 'rgb(' + colors[color] +')';
+                element.classList.add('selected');
+                element.style.backgroundColor = 'rgb(' + colors[color] +')';
 
-            COLOR = color;
+                COLOR = color;
+            });
         });
-    });
+    }
 
-    document.querySelectorAll('.brush').forEach(function (element) {
-        var brush = parseInt(element.getAttribute('data-brush'));
+    function initBrushSelector() {
+        document.querySelectorAll('.brush').forEach(function (element) {
+            var brush = parseInt(element.getAttribute('data-brush'));
 
-        element.style.width = (brush * 3) + 'px';
-        element.style.height = (brush * 3) + 'px';
+            element.style.width = (brush * 3) + 'px';
+            element.style.height = (brush * 3) + 'px';
 
-        element.addEventListener('click', function () {
-            document.querySelectorAll('.brush').forEach(function (e) { e.classList.remove('selected'); });
+            element.addEventListener('click', function () {
+                document.querySelectorAll('.brush').forEach(function (e) { e.classList.remove('selected'); });
 
-            element.classList.add('selected');
+                element.classList.add('selected');
 
-            BRUSH = brush;
+                BRUSH = brush;
+            });
         });
-    });
+    }
 
     // document.getElementById('clearButton').addEventListener('click', function () {
     //     clearCanvas();
@@ -446,6 +452,10 @@
 
     click('brushSelectButton', function () { show('brushSelectModal'); });
     click('brushSelectDoneButton', function () { hide('brushSelectModal'); });
+
+    click('erasorButton', function () {
+        COLOR = 0;
+    });
 
 </script>
 
