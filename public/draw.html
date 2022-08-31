@@ -3,6 +3,7 @@
     <head>
         <title>Limbo Flimbo</title>
         <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
         <style type="text/css"> 
 
             @font-face {
@@ -10,12 +11,20 @@
                 src: url('assets/Sligoil-Micro copy.otf');
             }
 
+            html {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
             body {
-                background-color:#f0f0f0;
-                margin: 0px;
+                margin: 0;
+                height: calc(100vh - 1px)
                 overflow: hidden;
                 font-family: Arial;
                 user-select: none;
+                /*background-color: blue;*/
+                touch-action:none;
             }
 
             #canvas {
@@ -57,20 +66,23 @@
 
             .question-en {
                 position: absolute;
-                left: 20px;
-                top: 5px;
+                left: 35px;
+                top: 35px;
                 width: 800px;
                 font-size: 38px;
+                font-weight: 700;
                 pointer-events: none;
+                line-height: 35px;
             }
 
             .question-de {
                 position: absolute;
-                left: 20px;
+                left: 35px;
                 top: 120px;
                 width: 800px;
                 font-size: 16px;
                 font-family: sigoil;
+                font-weight: 700;
                 pointer-events: none;
             }
 
@@ -80,7 +92,7 @@
             }
 
             .button:hover {
-                background-color: #efefef;
+                /*background-color: #efefef;*/
             }
 
             .brush-select.button {
@@ -104,10 +116,24 @@
                 height: 70px;
             }
 
+            .done.button {
+                left: 900px;
+                top: 650px;
+                width: 70px;
+                height: 70px;
+            }
+
             .ok.button {
                 left: 900px;
                 top: 690px;
                 font-size: 30px;
+                font-weight: 700;
+            }
+
+            .reload.button {
+                left: 410px;
+                top: 720px;
+                font-size: 20px;
             }
 
             .select-modal {
@@ -123,10 +149,15 @@
                 align-items: center;
             }
 
+            .busy-indicator {
+                text-align: center;
+            }
+
             .select-modal .title,
             .modal-dialog-content .title {
                 text-align: center;
                 font-size: 40px;
+                font-weight: 700;
             }
 
             .select-modal .subtitle,
@@ -135,10 +166,12 @@
                 font-family: sigoil;
                 font-size: 20px;
                 margin-top: 30px;
+                margin-bottom: 140px;
             }
 
             .modal-confirm-button {
-                font-size: 40px;
+                font-size: 30px;
+                font-weight: 700;
                 padding: 25px;
                 cursor: pointer;
             }
@@ -164,11 +197,11 @@
                 border-radius: 4px;
                 border-style: solid;
                 border-width: 2px;
-                border-color: #ddd;
+                border-color: transparent;
             }
 
             .color.selected {
-                border-color: black;
+                border-color: #c3d200;
             }
 
             .brushes {
@@ -205,17 +238,19 @@
 
         <canvas id="canvas"></canvas>
 
-        <div class="question-en">Draw a building you dont like,but you have to enter everyday</div>
-        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,du aber täglich betreten musst</div>
+        <div class="question-en">Draw a building you dont like,<br/>but you have to enter everyday</div>
+        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,<br/>du aber täglich betreten musst</div>
 
         <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
         <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
         <div class="eraser button" id="erasorButton"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
-        <div class="ok button" id="doneButton">OK</div>
+        <div class="done button" id="doneButton"><img src="assets/SVGsJohannes_Icons_OK.svg"/></div>
+        <div class="reload button" id="reloadButton">Alles neu</div>
 
         <div class="modal-dialog hidden" id="doneDialog">
             <div class="modal-dialog-content">
+                <div class="busy-indicator"><img src="assets/LIMBO_Gegenueber_Loading.gif"/></div>
                 <div class="title">Waiting for partner to be done...</div>
                 <div class="subtitle">Wir warten auf die Andere...</div>
             </div>
@@ -223,6 +258,7 @@
 
         <div class="modal-dialog hidden" id="printingDialog">
             <div class="modal-dialog-content">
+                <div class="busy-indicator"><img src="assets/LIMBO_Gegenueber_Loading.gif"/></div>
                 <div class="title">Printing in progress...</div>
                 <div class="subtitle">Es wird gedruckt...</div>
             </div>
@@ -280,7 +316,8 @@
 
 
     var CANVAS_WIDTH = 1024;
-    var CANVAS_HEIGHT = 768;
+    // var CANVAS_HEIGHT = 768;
+    var CANVAS_HEIGHT = 748;
 
     var COLOR = client === 'a' ? 11 : 21;
     var BRUSH = 10;
@@ -321,7 +358,8 @@
         if (mouseDown) {
             var dx  = mouseX - oldMouseX,
             dy = mouseY - oldMouseY,
-            d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
+            // d = Math.sqrt( dx * dx + dy * dy ) * 0.005;
+            d = Math.sqrt( dx * dx + dy * dy ) * 0.002;
 
             // // add extra point if far apart
             // if (dx > 20 || dy > 20) {
@@ -450,9 +488,9 @@
     click('brushSelectButton', function () { show('brushSelectModal'); });
     click('brushSelectDoneButton', function () { hide('brushSelectModal'); });
 
-    click('erasorButton', function () {
-        COLOR = 0;
-    });
+    click('erasorButton', function () { COLOR = 0; });
+
+    click('reloadButton', function () { window.location.reload(); });
 
 </script>
 
