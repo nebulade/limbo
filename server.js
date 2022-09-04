@@ -24,7 +24,7 @@ var state = {
     }
 };
 
-const STORAGE_PATH = path.join(__dirname, 'paintings');
+const STORAGE_PATH = path.join(process.env.CLOUDRON ? '/app/data/' : __dirname, 'paintings');
 fs.mkdirSync(path.join(STORAGE_PATH, 'csv'), { recursive: true });
 fs.mkdirSync(path.join(STORAGE_PATH, 'pdf'), { recursive: true });
 

@@ -360,8 +360,10 @@
     function inputMove(event) {
         oldMouseX = mouseX;
         oldMouseY = mouseY;
-        mouseX = event.clientX - canvas.offsetLeft;
-        mouseY = event.clientY - canvas.offsetTop;
+
+        // touchend has no clientX/Y
+        mouseX = event.clientX ? (event.clientX - canvas.offsetLeft) : oldMouseX;
+        mouseY = event.clientY ? (event.clientY - canvas.offsetTop) : oldMouseY;
 
         if (mouseDown) {
             var dx  = mouseX - oldMouseX,
