@@ -351,7 +351,9 @@
         // socket.emit('draw', { x: mouseX, y: mouseY, color: COLOR });
     }
 
-    function inputUp() {
+    function inputUp(event) {
+        // this ensures point drawn without movement
+        inputMove(event);
         mouseDown = false;
     }
 
@@ -376,8 +378,8 @@
             //     socket.emit('draw', { x: x, y: y, d: d, color: COLOR, brush: BRUSH });
             // }
 
-            draw(mouseX, mouseY, d, COLOR, BRUSH);
-            socket.emit('draw', { x: mouseX, y: mouseY, d: d, color: COLOR, brush: BRUSH });
+            draw(oldMouseX, oldMouseY, mouseX, mouseY, d, COLOR, BRUSH);
+            socket.emit('draw', { x0: oldMouseX, y0: oldMouseY, x1: mouseX, y1: mouseY, d: d, color: COLOR, brush: BRUSH });
         }
     }
 
@@ -391,7 +393,7 @@
     window.document.addEventListener('touchmove', function (event) { inputMove(event.touches[0]); });
 
     function remoteDrawHandler(data) {
-        draw(data.x, data.y, data.d, data.color, data.brush);
+        draw(data.x0, data.y0, data.x1, data.y1, data.d, data.color, data.brush);
     }
 
     socket.on('clear', function () {
@@ -434,13 +436,29 @@
         });
     });
 
-    function draw(x, y, d, color, brush) {
+    function draw(x0, y0, x1, y1, d, color, brush) {
         var penSize = brush;
-        context.beginPath();
-        context.fillStyle = 'rgba(' + colors[color] +', ' + ( 0.7 - d )  + ')';
-        context.arc(x, y, penSize, 0, Math.PI*2, true);
-        context.closePath();
-        context.fill();
+
+        var a = x0 - x1;
+        var b = y0 - y1;
+        var distance = Math.sqrt( a*a + b*b );
+
+        // draw point instead of line if distance is small
+        if (distance < 5) {
+            context.beginPath();
+            context.fillStyle = 'rgb(' + colors[color] +')';
+            context.arc(x1, y1, penSize, 0, Math.PI*2, true);
+            context.closePath();
+            context.fill();
+        } else {
+            context.beginPath();
+            context.strokeStyle = 'rgb(' + colors[color] +')';
+            context.lineWidth = penSize*2;
+            context.lineCap = 'round';
+            context.moveTo(x0,y0);
+            context.lineTo(x1,y1);
+            context.stroke();
+        }
     }
 
     function initColorSelector() {

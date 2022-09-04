@@ -50,15 +50,34 @@ const rawQuestions = fs.readFileSync(path.join(__dirname, 'questions.txt'), 'utf
 for (let i = 0; i < rawQuestions.length; i += 3) {
     questions.push({
         de: rawQuestions[i],
-        en: rawQuestions[i+1]
+        en: rawQuestions[i+1],
+        hit: false
     });
 }
 
+function getRandomDifferent(arr, last) {
+    let num = 0;
+    do {
+        num = Math.floor(Math.random() * arr.length);
+    } while (num === last);
+
+    return num;
+}
+
 function setNextQuestion() {
-    currentQuestionIndex = Math.floor(Math.random() * questions.length);
+    currentQuestionIndex = getRandomDifferent(questions, currentQuestionIndex);
     question = questions[currentQuestionIndex];
+    question.hit = true;
+    console.log('next question: ', currentQuestionIndex);
 }
 setNextQuestion();
+
+// random question tester
+// var i = 0;
+// while (!questions.every(function (q) { return q.hit; })) {
+//     console.log(currentQuestionIndex, 'after', i++);
+//     setNextQuestion();
+// }
 
 io.sockets.on('connection', function (socket) {
     console.log('new Connection');
@@ -93,12 +112,8 @@ io.sockets.on('connection', function (socket) {
                 const pdfPath = path.join(STORAGE_PATH, 'pdf', Date.now() + '.pdf');
                 console.log(`saving to ${canvasPath} and ${pdfPath}`);
 
-                const filteredStrokes = strokes.filter(function (s) {
-                    return s.x && s.y && typeof s.d !== 'undefined' && typeof s.color !== 'undefined' && s.brush;
-                });
-
-                fs.writeFileSync(canvasPath, filteredStrokes.map(function (s) { return `${s.x},${s.y},${s.d},${s.color},${s.brush}`; }).join('\n') + '\n');
-                printer.print(colors, filteredStrokes, pdfPath);
+                fs.writeFileSync(canvasPath, strokes.map(function (s) { return `${s.x0},${s.y0},${s.x1},${s.y1},${s.d},${s.color},${s.brush}`; }).join('\n') + '\n');
+                printer.print(colors, strokes, pdfPath);
 
                 setTimeout(function () {
                     console.log('printing done, reset all clients');
