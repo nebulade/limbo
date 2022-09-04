@@ -24,6 +24,10 @@ var state = {
     }
 };
 
+const STORAGE_PATH = path.join(__dirname, 'paintings');
+fs.mkdirSync(path.join(STORAGE_PATH, 'csv'), { recursive: true });
+fs.mkdirSync(path.join(STORAGE_PATH, 'pdf'), { recursive: true });
+
 const colors = [];
 colors[0] = '255,255,255';
 
@@ -39,6 +43,8 @@ colors[23] = '28,255,237';
 colors[24] = '237,255,36';
 colors[25] = '39,255,7';
 
+let currentQuestionIndex = 0;
+let question = null;
 const questions = [];
 const rawQuestions = fs.readFileSync(path.join(__dirname, 'questions.txt'), 'utf8').split('\n');
 for (let i = 0; i < rawQuestions.length; i += 3) {
@@ -48,19 +54,16 @@ for (let i = 0; i < rawQuestions.length; i += 3) {
     });
 }
 
-const STORAGE_PATH = path.join(__dirname, 'paintings');
-
-function ensureStoragePath() {
-    fs.mkdirSync(path.join(STORAGE_PATH, 'csv'), { recursive: true });
-    fs.mkdirSync(path.join(STORAGE_PATH, 'pdf'), { recursive: true });
+function setNextQuestion() {
+    currentQuestionIndex = Math.floor(Math.random() * questions.length);
+    question = questions[currentQuestionIndex];
 }
-
-ensureStoragePath();
+setNextQuestion();
 
 io.sockets.on('connection', function (socket) {
     console.log('new Connection');
 
-    socket.emit('init', { state, strokes, colors });
+    socket.emit('init', { state, strokes, colors, question });
 
     socket.on('draw', function (data) {
         strokes.push(data);
@@ -103,7 +106,9 @@ io.sockets.on('connection', function (socket) {
                     state.b.done = false;
                     strokes = [];
 
-                    io.emit('reset', {});
+                    setNextQuestion();
+
+                    io.emit('reset', { question });
                 }, 2000);
             }, 1000);
         }

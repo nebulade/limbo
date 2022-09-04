@@ -15,6 +15,7 @@
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
+                background-color: #e8e8e8;
             }
 
             body {
@@ -238,8 +239,8 @@
 
         <canvas id="canvas"></canvas>
 
-        <div class="question-en">Draw a building you dont like,<br/>but you have to enter everyday</div>
-        <div class="question-de">Zeichne ein Gebäude welches du nicht magst,<br/>du aber täglich betreten musst</div>
+        <div class="question-en"></div>
+        <div class="question-de"></div>
 
         <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
         <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
@@ -321,8 +322,8 @@
 
     var COLOR = client === 'a' ? 11 : 21;
     var BRUSH = 10;
-    var colors = [];
 
+    var colors = [];
     var done = false;
 
     var canvas = document.getElementById( 'canvas' );
@@ -337,6 +338,11 @@
         context.fillRect( 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
     }
     clearCanvas();
+
+    function setQuestion(question) {
+        document.getElementsByClassName('question-en')[0].innerText = question.en;
+        document.getElementsByClassName('question-de')[0].innerText = question.de;
+    }
 
     function inputDown(event) {
         mouseDown = true;
@@ -408,6 +414,7 @@
         hide('doneDialog');
         hide('printingDialog');
         done = false;
+        setQuestion(data.question);
     });
 
     socket.on('draw', remoteDrawHandler);
@@ -418,6 +425,7 @@
         done = data.state[client].done;
         colors = data.colors;
 
+        setQuestion(data.question);
         initColorSelector();
         initBrushSelector();
 
