@@ -24,7 +24,7 @@ var state = {
     }
 };
 
-var colors = [];
+const colors = [];
 colors[0] = '255,255,255';
 
 colors[11] = '255,0,0';
@@ -39,13 +39,14 @@ colors[23] = '28,255,237';
 colors[24] = '237,255,36';
 colors[25] = '39,255,7';
 
-var questions = [{
-    en: '',
-    de: ''
-}, {
-    en: '',
-    de: ''
-}];
+const questions = [];
+const rawQuestions = fs.readFileSync(path.join(__dirname, 'questions.txt'), 'utf8').split('\n');
+for (let i = 0; i < rawQuestions.length; i += 3) {
+    questions.push({
+        de: rawQuestions[i],
+        en: rawQuestions[i+1]
+    });
+}
 
 const STORAGE_PATH = path.join(__dirname, 'paintings');
 
