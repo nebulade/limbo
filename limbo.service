@@ -1,0 +1,14 @@
+[Unit]
+Description=Limbo
+After=network.target
+
+[Service]
+ExecStart=node ./server.js
+WorkingDirectory=/opt/limbo
+Environment="NODE_ENV=production"
+Restart=always
+User=nebulon
+Group=nebulon
+
+[Install]
+WantedBy=multi-user.target
