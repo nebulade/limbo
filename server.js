@@ -113,10 +113,10 @@ io.sockets.on('connection', function (socket) {
                 console.log(`saving to ${canvasPath} and ${pdfPath}`);
 
                 fs.writeFileSync(canvasPath, strokes.map(function (s) { return `${s.x0},${s.y0},${s.x1},${s.y1},${s.d},${s.color},${s.brush}`; }).join('\n') + '\n');
-                printer.print(colors, strokes, pdfPath);
 
-                setTimeout(function () {
+                printer.print(colors, strokes, pdfPath, function () {
                     console.log('printing done, reset all clients');
+
                     state.a.done = false;
                     state.b.done = false;
                     strokes = [];
@@ -124,7 +124,7 @@ io.sockets.on('connection', function (socket) {
                     setNextQuestion();
 
                     io.emit('reset', { question });
-                }, 2000);
+                });
             }, 1000);
         }
     });

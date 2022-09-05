@@ -5,7 +5,7 @@ After=network.target
 [Service]
 ExecStart=node ./server.js
 WorkingDirectory=/opt/limbo
-Environment="NODE_ENV=production"
+Environment="NODE_ENV=production; PRINTING=true"
 Restart=always
 User=nebulon
 Group=nebulon
