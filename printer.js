@@ -56,7 +56,7 @@ function print(colors, strokes, pdfPath, callback) {
     out.on('finish', function () {
         console.log('The file was created.');
 
-        if (process.env.PRINTING) execSync(`lp -o number-up=2 ${pdfPath}`);
+        if (process.env.PRINTING) execSync(`lp -o media=A4.Borderless -o number-up=2 ${pdfPath}`);
 
         callback();
     });
