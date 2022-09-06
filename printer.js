@@ -9,7 +9,7 @@ const { createCanvas, registerFont } = require('canvas'),
     path = require('path'),
     fs = require('fs');
 
-registerFont(path.join(__dirname, 'public/assets/Sligoil-Micro copy.otf'), { family: 'sigoil' });
+registerFont(path.join(__dirname, 'public/assets/Sligoil-Micro copy.otf'), { family: 'sligoil' });
 
 function draw(context, colors, x0, y0, x1, y1, d, color, brush) {
     var penSize = brush;
@@ -36,19 +36,23 @@ function draw(context, colors, x0, y0, x1, y1, d, color, brush) {
     }
 }
 
-function print(colors, strokes, pdfPath, callback) {
+function print(question, colors, strokes, pdfPath, callback) {
     // https://www.din-formate.de/reihe-a-din-groessen-mm-pixel-dpi.html with 300ppi
     // const canvas = createCanvas(2480, 1748, 'pdf');
     const canvas = createCanvas(1024, 768, 'pdf');
     const ctx = canvas.getContext('2d');
 
+    ctx.fillStyle = '#000000';
+    ctx.font = '24px sligoil';
+    ctx.fillText(question.en, 50, 50);
+    ctx.font = '20px sligoil';
+    ctx.fillText(question.de, 50, 90);
+    ctx.font = '15px sligoil';
+    ctx.fillText('Gegenüber ' + (new Date()).toLocaleString('de'), 750, 750);
+
     strokes.forEach(function (data) {
         draw(ctx, colors, data.x0, data.y0, data.x1, data.y1, data.d, data.color, data.brush);
     });
-
-    // Write "Awesome!"
-    ctx.font = '30px sigoil';
-    ctx.fillText('Awesome!', 50, 100);
 
     const out = fs.createWriteStream(pdfPath);
     const stream = canvas.createPDFStream();
@@ -56,7 +60,8 @@ function print(colors, strokes, pdfPath, callback) {
     out.on('finish', function () {
         console.log('The file was created.');
 
-        if (process.env.PRINTING) execSync(`lp -o media=A4.Borderless -o number-up=2 ${pdfPath}`);
+        // if (process.env.PRINTING) execSync(`lp -o media=A4.Borderless -o number-up=2 ${pdfPath}`);
+        if (process.env.PRINTING) execSync(`lp -o media=A5 -o number-up=1 ${pdfPath}`);
 
         callback();
     });
