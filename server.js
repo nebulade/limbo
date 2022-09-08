@@ -31,17 +31,27 @@ fs.mkdirSync(path.join(STORAGE_PATH, 'pdf'), { recursive: true });
 const colors = [];
 colors[0] = '255,255,255';
 
-colors[11] = '255,0,0';
-colors[12] = '255,100,255';
-colors[13] = '255,83,237';
-colors[14] = '255,28,36';
-colors[15] = '255,200,7';
+colors[10] = '#d3d3d3';
+colors[11] = '#0444b2';
+colors[12] = '#05ff19';
+colors[13] = '#d8bf03';
+colors[14] = '#e3c7a0';
+colors[15] = '#603e22';
+colors[16] = '#8d73fa';
+colors[17] = '#ff07fe';
+colors[18] = '#ff9002';
+colors[19] = '#bc0605';
 
-colors[21] = '0,255,0';
-colors[22] = '255,100,255';
-colors[23] = '28,255,237';
-colors[24] = '237,255,36';
-colors[25] = '39,255,7';
+colors[20] = '#878787';
+colors[21] = '#73eff9';
+colors[22] = '#208235';
+colors[23] = '#f4ff0a';
+colors[24] = '#d8d4a4';
+colors[25] = '#6c6038';
+colors[26] = '#9c02ff';
+colors[27] = '#fcb4f3';
+colors[28] = '#ac4906';
+colors[29] = '#fc3812';
 
 let currentQuestionIndex = 0;
 let question = null;
