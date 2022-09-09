@@ -112,6 +112,8 @@ io.sockets.on('connection', function (socket) {
 
         console.log('new state', state);
 
+        io.emit('state', { state });
+
         if (state.a.done && state.b.done) {
             setTimeout(function () {
                 console.log('All done, trigger printing now!');

@@ -230,6 +230,32 @@
                 left: 10px;
             }
 
+            .done-bubble {
+                display: block;
+                position: absolute;
+                background-size: cover;
+                background-repeat: no-repeat;top: 456px;
+                left: 731px;
+                height: 190px;
+                width: 256px;
+                background-image: url('assets/SVGsJohannes_Icons_Speechbubble-26.svg');
+            }
+
+            .done-bubble-en {
+                font-size: 14px;
+                font-weight: bold;
+                margin-top: 26px;
+                margin-left: 40px;
+            }
+
+            .done-bubble-de {
+                font-size: 11px;
+                font-family: sigoil;
+                text-align: right;
+                margin-top: 35px;
+                margin-right: 40px;
+            }
+
         </style>
     </head>
     <body>
@@ -244,7 +270,12 @@
         <div class="eraser button" id="erasorButton"><img id="erasorButtonIcon" src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
         <div class="done button" id="doneButton"><img src="assets/SVGsJohannes_Icons_OK.svg"/></div>
-        <div class="reload button" id="reloadButton">Alles neu</div>
+        <!-- <div class="reload button" id="reloadButton">Alles neu</div> -->
+
+        <div class="done-bubble hidden" id="doneBubble">
+            <div class="done-bubble-en">Your drawing<br/>partner is done!</div>
+            <div class="done-bubble-de">Dein Zeichenpartner<br/>ist fertig!</div>
+        </div>
 
         <div class="modal-dialog hidden" id="doneDialog">
             <div class="modal-dialog-content">
@@ -421,8 +452,17 @@
         clearCanvas();
         hide('doneDialog');
         hide('printingDialog');
+        hide('doneBubble');
         done = false;
         setQuestion(data.question);
+    });
+
+    socket.on('state', function (data) {
+        if (data.state[client === 'a' ? 'b' : 'a'].done) show('doneBubble');
+        if (data.state.a.done && data.state.b.done) {
+            hide('doneBubble');
+            show('doneDialog');
+        }
     });
 
     socket.on('draw', remoteDrawHandler);
@@ -440,6 +480,9 @@
         data.strokes.forEach(function (d) {
             remoteDrawHandler(d);
         });
+
+        if (data.state[client === 'a' ? 'b' : 'a'].done) show('doneBubble');
+        if (data.state[client].done) show('doneDialog');
     });
 
     function draw(x0, y0, x1, y1, d, color, brush) {
@@ -511,6 +554,7 @@
 
     click('doneButton', function () {
         show('doneDialog');
+        hide('doneBubble');
         socket.emit('done', { client: client });
     });
 
@@ -531,7 +575,7 @@
     });
 
     document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush_BOLD.svg';
-    click('reloadButton', function () { window.location.reload(); });
+    // click('reloadButton', function () { window.location.reload(); });
 
 </script>
 
