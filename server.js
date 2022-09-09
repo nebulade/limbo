@@ -57,8 +57,10 @@ let currentQuestionIndex = 0;
 let question = null;
 const questions = [];
 const rawQuestions = fs.readFileSync(path.join(__dirname, 'questions.txt'), 'utf8').split('\n');
+let questionNr = 1;
 for (let i = 0; i < rawQuestions.length; i += 3) {
     questions.push({
+        nr: questionNr++,
         de: rawQuestions[i],
         en: rawQuestions[i+1],
         hit: false
@@ -78,9 +80,26 @@ function setNextQuestion() {
     currentQuestionIndex = getRandomDifferent(questions, currentQuestionIndex);
     question = questions[currentQuestionIndex];
     question.hit = true;
-    console.log('next question: ', currentQuestionIndex);
+    console.log('next question:', currentQuestionIndex);
 }
 setNextQuestion();
+
+let drawingNr = 0;
+try {
+    drawingNr = parseInt(fs.readFileSync(path.join(process.env.CLOUDRON ? '/app/data/' : __dirname, 'drawing.nr'), 'utf8'));
+} catch (e) {
+    console.error('No drawing nr file found. Starting with 0.', e);
+}
+console.log('Drawings already counted:', drawingNr);
+function advanceDrawingNr() {
+    drawingNr++;
+
+    try {
+        fs.writeFileSync(path.join(__dirname, 'drawing.nr'), String(drawingNr), 'utf8');
+    } catch (e) {
+        console.error('Failed to stash drawing nr.', e);
+    }
+}
 
 // random question tester
 // var i = 0;
@@ -126,7 +145,7 @@ io.sockets.on('connection', function (socket) {
 
                 fs.writeFileSync(canvasPath, strokes.map(function (s) { return `${s.x0},${s.y0},${s.x1},${s.y1},${s.d},${s.color},${s.brush}`; }).join('\n') + '\n');
 
-                printer.print(question, colors, strokes, pdfPath, function () {
+                printer.print(question, colors, strokes, pdfPath, drawingNr, function () {
                     console.log('printing done, reset all clients');
 
                     setTimeout(function () {
@@ -135,6 +154,7 @@ io.sockets.on('connection', function (socket) {
                         strokes = [];
 
                         setNextQuestion();
+                        advanceDrawingNr();
 
                         io.emit('reset', { question });
                     }, 5000);

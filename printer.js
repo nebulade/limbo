@@ -36,7 +36,7 @@ function draw(context, colors, x0, y0, x1, y1, d, color, brush) {
     }
 }
 
-function print(question, colors, strokes, pdfPath, callback) {
+function print(question, colors, strokes, pdfPath, drawingNr, callback) {
     // https://www.din-formate.de/reihe-a-din-groessen-mm-pixel-dpi.html with 300ppi
     // const canvas = createCanvas(2480, 1748, 'pdf');
     const canvas = createCanvas(1024, 768, 'pdf');
@@ -47,8 +47,15 @@ function print(question, colors, strokes, pdfPath, callback) {
     ctx.fillText(question.en, 50, 50);
     ctx.font = '20px sligoil';
     ctx.fillText(question.de, 50, 90);
+
+    const lineHeight = 20;
+    const left = 1000;
     ctx.font = '15px sligoil';
-    ctx.fillText('Gegenüber ' + (new Date()).toLocaleString('de'), 750, 750);
+    ctx.textAlign = 'right';
+    ctx.fillText(`No ${drawingNr}`, left, 750 - lineHeight * 3);
+    ctx.fillText((new Date()).toLocaleString('de'), left, 750 - lineHeight * 2);
+    ctx.fillText('Gegen//Über', left, 750 - lineHeight * 1);
+    ctx.fillText(`Question No ${question.nr}`, left, 750);
 
     strokes.forEach(function (data) {
         draw(ctx, colors, data.x0, data.y0, data.x1, data.y1, data.d, data.color, data.brush);
