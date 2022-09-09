@@ -239,9 +239,9 @@
         <div class="question-en"></div>
         <div class="question-de"></div>
 
-        <div class="brush-select button" id="brushSelectButton"><img src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
+        <div class="brush-select button" id="brushSelectButton"><img id="brushButtonIcon" src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
         <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
-        <div class="eraser button" id="erasorButton"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+        <div class="eraser button" id="erasorButton"><img id="erasorButtonIcon" src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
         <div class="done button" id="doneButton"><img src="assets/SVGsJohannes_Icons_OK.svg"/></div>
         <div class="reload button" id="reloadButton">Alles neu</div>
@@ -518,10 +518,19 @@
     click('colorSelectDoneButton', function () { hide('colorSelectModal'); });
 
     click('brushSelectButton', function () { show('brushSelectModal'); });
-    click('brushSelectDoneButton', function () { hide('brushSelectModal'); });
+    click('brushSelectDoneButton', function () {
+        hide('brushSelectModal');
+        document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush_BOLD.svg';
+        document.getElementById('erasorButtonIcon').src = 'assets/SVGsJohannes_Icons_Eraser.svg';
+    });
 
-    click('erasorButton', function () { COLOR = 0; });
+    click('erasorButton', function () {
+        COLOR = 0;
+        document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush.svg';
+        document.getElementById('erasorButtonIcon').src = 'assets/SVGsJohannes_Icons_Eraser_BOLD.svg';
+    });
 
+    document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush_BOLD.svg';
     click('reloadButton', function () { window.location.reload(); });
 
 </script>
