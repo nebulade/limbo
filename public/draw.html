@@ -167,7 +167,7 @@
                 font-family: sigoil;
                 font-size: 20px;
                 margin-top: 30px;
-                margin-bottom: 140px;
+                margin-bottom: 60px;
             }
 
             .modal-confirm-button {
@@ -186,8 +186,6 @@
             .colors {
                 display: flex;
                 justify-content: center;
-                margin-top: 20px;
-                margin-bottom: 10px;
             }
 
             .color {
@@ -202,7 +200,7 @@
             }
 
             .color.selected {
-                border-color: #c3d200;
+                border-color: black;
             }
 
             .brushes {
@@ -233,7 +231,6 @@
             }
 
         </style>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
 
@@ -270,11 +267,18 @@
             <div class="title">Choose a Colour</div>
             <div class="subtitle">Wähle eine Farbe</div>
             <div class="colors">
+                <div class="color" data-color="0"></div>
                 <div class="color" data-color="1"></div>
                 <div class="color" data-color="2"></div>
                 <div class="color" data-color="3"></div>
                 <div class="color" data-color="4"></div>
+            </div>
+            <div class="colors">
                 <div class="color" data-color="5"></div>
+                <div class="color" data-color="6"></div>
+                <div class="color" data-color="7"></div>
+                <div class="color" data-color="8"></div>
+                <div class="color" data-color="9"></div>
             </div>
             <span class="modal-confirm-button" id="colorSelectDoneButton">OK</span>
         </div>
@@ -448,13 +452,13 @@
         // draw point instead of line if distance is small
         if (distance < 5) {
             context.beginPath();
-            context.fillStyle = 'rgb(' + colors[color] +')';
+            context.fillStyle = colors[color];
             context.arc(x1, y1, penSize, 0, Math.PI*2, true);
             context.closePath();
             context.fill();
         } else {
             context.beginPath();
-            context.strokeStyle = 'rgb(' + colors[color] +')';
+            context.strokeStyle = colors[color];
             context.lineWidth = penSize*2;
             context.lineCap = 'round';
             context.moveTo(x0,y0);
@@ -470,13 +474,13 @@
             // each client has a different color palette
             color = (client === 'a' ? 10 : 20) + color;
 
-            element.style.backgroundColor = 'rgba(' + colors[color] +')';
+            element.style.backgroundColor = colors[color];
 
             element.addEventListener('click', function () {
                 document.querySelectorAll('.color').forEach(function (e) { e.classList.remove('selected'); });
 
                 element.classList.add('selected');
-                element.style.backgroundColor = 'rgb(' + colors[color] +')';
+                element.style.backgroundColor = colors[color];
 
                 COLOR = color;
             });

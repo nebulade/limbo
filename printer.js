@@ -21,13 +21,13 @@ function draw(context, colors, x0, y0, x1, y1, d, color, brush) {
     // draw point instead of line if distance is small
     if (distance < 5) {
         context.beginPath();
-        context.fillStyle = 'rgb(' + colors[color] +')';
+        context.fillStyle = colors[color];
         context.arc(x1, y1, penSize, 0, Math.PI*2, true);
         context.closePath();
         context.fill();
     } else {
         context.beginPath();
-        context.strokeStyle = 'rgb(' + colors[color] +')';
+        context.strokeStyle = colors[color];
         context.lineWidth = penSize*2;
         context.lineCap = 'round';
         context.moveTo(x0,y0);

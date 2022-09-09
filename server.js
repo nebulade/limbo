@@ -29,7 +29,7 @@ fs.mkdirSync(path.join(STORAGE_PATH, 'csv'), { recursive: true });
 fs.mkdirSync(path.join(STORAGE_PATH, 'pdf'), { recursive: true });
 
 const colors = [];
-colors[0] = '255,255,255';
+colors[0] = '#ffffff';
 
 colors[10] = '#d3d3d3';
 colors[11] = '#0444b2';
