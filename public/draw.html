@@ -267,7 +267,7 @@
 
         <div class="brush-select button" id="brushSelectButton"><img id="brushButtonIcon" src="assets/SVGsJohannes_Icons_Brush.svg"/></div>
         <div class="color-select button" id="colorSelectButton"><img src="assets/SVGsJohannes_Icons_ColorBucket.svg"/></div>
-        <div class="eraser button" id="erasorButton"><img id="erasorButtonIcon" src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+        <div class="eraser button" id="erasorSelectButton"><img id="erasorButtonIcon" src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
         <div class="done button" id="doneButton"><img src="assets/SVGsJohannes_Icons_OK.svg"/></div>
         <div class="reload button hidden" id="reloadButton">Alles neu</div>
@@ -328,6 +328,20 @@
             <span class="modal-confirm-button" id="brushSelectDoneButton">OK</span>
         </div>
 
+        <div class="select-modal hidden" id="erasorSelectModal">
+            <div class="modal-title-icon"><img src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
+            <div class="title">Choose a Rubber Size</div>
+            <div class="subtitle">Wähle eine Radiergummigröße</div>
+            <div class="brushes">
+                <div class="brush" data-brush="5"></div>
+                <div class="brush" data-brush="10"></div>
+                <div class="brush" data-brush="15"></div>
+                <div class="brush" data-brush="20"></div>
+                <div class="brush" data-brush="25"></div>
+            </div>
+            <span class="modal-confirm-button" id="erasorSelectDoneButton">OK</span>
+        </div>
+
         <div class="client-indicator" id="clientIndicator"></div>
         
 <script src="/socket.io/socket.io.js"></script>
@@ -359,7 +373,8 @@
     CANVAS_WIDTH = 1080;
     CANVAS_HEIGHT = 790;
 
-    var COLOR = client === 'a' ? 11 : 21;
+    var COLOR = client === 'a' ? 10 : 20;
+    var LAST_COLOR = COLOR;
     var BRUSH = 10;
 
     var colors = [];
@@ -568,11 +583,15 @@
     click('brushSelectButton', function () { show('brushSelectModal'); });
     click('brushSelectDoneButton', function () {
         hide('brushSelectModal');
+        COLOR = LAST_COLOR;
         document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush_BOLD.svg';
         document.getElementById('erasorButtonIcon').src = 'assets/SVGsJohannes_Icons_Eraser.svg';
     });
 
-    click('erasorButton', function () {
+    click('erasorSelectButton', function () { show('erasorSelectModal'); });
+    click('erasorSelectDoneButton', function () {
+        hide('erasorSelectModal');
+        LAST_COLOR = COLOR;
         COLOR = 0;
         document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush.svg';
         document.getElementById('erasorButtonIcon').src = 'assets/SVGsJohannes_Icons_Eraser_BOLD.svg';
