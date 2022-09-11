@@ -270,7 +270,7 @@
         <div class="eraser button" id="erasorButton"><img id="erasorButtonIcon" src="assets/SVGsJohannes_Icons_Eraser.svg"/></div>
 
         <div class="done button" id="doneButton"><img src="assets/SVGsJohannes_Icons_OK.svg"/></div>
-        <!-- <div class="reload button" id="reloadButton">Alles neu</div> -->
+        <div class="reload button hidden" id="reloadButton">Alles neu</div>
 
         <div class="done-bubble hidden" id="doneBubble">
             <div class="done-bubble-en">Your drawing<br/>partner is done!</div>
@@ -354,6 +354,10 @@
     var CANVAS_WIDTH = 1024;
     // var CANVAS_HEIGHT = 768;
     var CANVAS_HEIGHT = 748;
+
+// lisa ipad 8th gen
+    CANVAS_WIDTH = 1080;
+    CANVAS_HEIGHT = 790;
 
     var COLOR = client === 'a' ? 11 : 21;
     var BRUSH = 10;
@@ -575,7 +579,7 @@
     });
 
     document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush_BOLD.svg';
-    // click('reloadButton', function () { window.location.reload(); });
+    click('reloadButton', function () { window.location.reload(); });
 
 </script>
 
