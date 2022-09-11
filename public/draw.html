@@ -578,7 +578,10 @@
     });
 
     click('colorSelectButton', function () { show('colorSelectModal'); });
-    click('colorSelectDoneButton', function () { hide('colorSelectModal'); });
+    click('colorSelectDoneButton', function () {
+        hide('colorSelectModal');
+        LAST_COLOR = COLOR;
+    });
 
     click('brushSelectButton', function () { show('brushSelectModal'); });
     click('brushSelectDoneButton', function () {
