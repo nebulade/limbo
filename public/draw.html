@@ -591,7 +591,7 @@
     click('erasorSelectButton', function () { show('erasorSelectModal'); });
     click('erasorSelectDoneButton', function () {
         hide('erasorSelectModal');
-        LAST_COLOR = COLOR;
+        LAST_COLOR = COLOR === 0 ? LAST_COLOR : COLOR;
         COLOR = 0;
         document.getElementById('brushButtonIcon').src = 'assets/SVGsJohannes_Icons_Brush.svg';
         document.getElementById('erasorButtonIcon').src = 'assets/SVGsJohannes_Icons_Eraser_BOLD.svg';
